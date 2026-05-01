@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zorba's Cinema Pro - Classic Serif</title>
+    <title>Zorba's Cinema Pro - Classic Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* 휴먼명조 스타일 적용 (시스템 폰트 및 구글 폰트 백업) */
+        /* 휴먼명조 스타일: 시스템 폰트를 우선하되 볼드를 제거한 단아한 설정 */
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400&display=swap');
+
         .font-human-myeongjo { 
-            font-family: "Humnst777 BT", "Human Myungjo", "궁서체", "Gungsuh", "Nanum Myeongjo", serif;
-            font-weight: 400; /* 볼드 제거 */
+            font-family: "휴먼명조", "Human Myungjo", "바탕체", "Batang", "Nanum Myeongjo", serif;
+            font-weight: 400 !important; /* 볼드 절대 금지 */
+            letter-spacing: -0.01em;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo&display=swap" rel="stylesheet">
 </head>
 <body class="bg-[#141414] text-white p-4 md:p-10 font-sans tracking-tight">
     <div class="max-w-6xl mx-auto">
         <header class="mb-12 text-center">
-            <h1 class="text-6xl font-black text-[#E50914] mb-4 tracking-tighter italic">ZORBA'S CINEMA PRO</h1>
-            <div id="statusMessage" class="text-zinc-500 font-bold mb-2 text-sm uppercase tracking-widest">데이터 아카이브 불러오는 중...</div>
+            <h1 class="text-6xl font-black text-[#E50914] mb-4 tracking-tighter italic uppercase">Zorba's Cinema Pro</h1>
+            <div id="statusMessage" class="text-zinc-500 font-bold mb-2 text-sm">데이터 아카이브 구성 중...</div>
             <div id="grandTotalDisplay" class="hidden text-xl font-bold text-zinc-400 italic">
                 총 시청 작품: <span id="uniqueTotal" class="text-emerald-400 text-3xl">0</span>편 
                 <span id="rawTotal" class="text-sm font-normal ml-2 opacity-50">(총 0편 시청)</span>
@@ -28,9 +30,16 @@
         </header>
 
         <div id="mainApp" class="hidden">
+            <!-- 연도 선택 -->
             <div id="yearContainer" class="flex flex-wrap justify-center gap-4 mb-10"></div>
+            
+            <!-- 월 선택 -->
             <div id="monthContainer" class="hidden flex flex-wrap justify-center gap-3 mb-10 p-6 bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-white/10 shadow-2xl"></div>
+            
+            <!-- 상세 목록 제목 -->
             <div id="listTitle" class="text-2xl font-normal mb-6 pl-4 border-l-8 border-emerald-500 font-human-myeongjo"></div>
+            
+            <!-- 상세 목록 리스트 -->
             <div id="movieList" class="space-y-4 pb-20"></div>
         </div>
     </div>
@@ -92,7 +101,7 @@
                 return `
                     <button onclick="selectYear('${year}')" class="year-btn bg-zinc-800/40 hover:bg-zinc-700/60 px-8 py-4 rounded-2xl font-black transition-all flex flex-col items-center min-w-[130px] border border-white/20 shadow-lg group">
                         <span class="text-xl text-zinc-100">${year}</span>
-                        <span class="text-[11px] text-amber-400 mt-1 font-bold">${yearUniqueCount} 편</span>
+                        <span class="text-[11px] text-amber-400 mt-1 font-bold">${yearUniqueCount.toLocaleString()} 편</span>
                     </button>`;
             }).join('');
         }
@@ -100,6 +109,7 @@
         function selectYear(year) {
             const container = document.getElementById('monthContainer');
             container.classList.remove('hidden');
+            
             document.querySelectorAll('.year-btn').forEach(btn => {
                 btn.classList.remove('bg-emerald-500/20', 'ring-1', 'ring-emerald-500/50', 'border-emerald-500/60');
                 btn.classList.add('bg-zinc-800/40', 'border-white/20');
@@ -122,6 +132,7 @@
         function selectMonth(year, month) {
             const data = groupedData[year][month];
             const workMap = {};
+            
             document.querySelectorAll('.month-btn').forEach(btn => btn.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-400'));
             event.currentTarget.classList.add('bg-emerald-600', 'text-white', 'border-emerald-400');
 
@@ -138,6 +149,7 @@
                 const seasonMatch = item.Title.match(/(시즌\s?\d+|파트\s?\d+|Part\s?\d+|리미티드 시리즈)/);
                 if (seasonMatch) workMap[item.baseTitle].seasons.add(seasonMatch[0]);
             });
+
             renderDetails(year, month, Object.values(workMap));
         }
 
@@ -156,7 +168,9 @@
                             ${work.seasons.size > 0 ? `<span class="bg-emerald-900/30 text-emerald-400 text-[9px] px-2 py-0.5 rounded border border-emerald-500/20 font-bold tracking-tighter">${work.seasons.size} 시즌</span>` : ''}
                             <span class="bg-zinc-800 text-amber-400/80 text-[9px] px-2 py-0.5 rounded border border-white/5 font-bold tracking-tighter">${work.episodes.length} 편</span>
                         </div>
-                        <h3 class="text-xl leading-tight text-zinc-100 font-human-myeongjo group-hover:text-emerald-400 transition-colors">${work.title}</h3>
+                        <h3 class="text-xl leading-tight text-zinc-100 font-human-myeongjo group-hover:text-emerald-400 transition-colors">
+                            ${work.title}
+                        </h3>
                     </div>
                     <a href="https://www.google.com/search?q=${encodeURIComponent(work.title)}+정보" target="_blank" class="p-4 rounded-full border border-white/10 hover:bg-white hover:text-black transition-all">
                         <i class="fa-solid fa-magnifying-glass"></i>
