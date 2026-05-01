@@ -1,121 +1,166 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Zorba's Netflix Archive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zorba's Cinema Archive</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    </style>
 </head>
-<body class="bg-[#141414] text-white p-6">
-    <div class="max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold text-red-600 mb-8">MY NETFLIX <span id="count" class="text-sm bg-red-600 text-white px-3 py-1 rounded-full ml-2">0</span></h1>
-        <div id="movie-list" class="space-y-4"></div>
+<body class="bg-[#141414] text-white p-4 md:p-10 font-sans tracking-tight">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-12 text-center">
+            <h1 class="text-6xl font-black text-[#E50914] mb-4 tracking-tighter italic">ZORBA'S CINEMA PRO</h1>
+            <div id="statusMessage" class="text-zinc-500 font-bold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-spinner animate-spin"></i> 데이터를 동기화하는 중...
+            </div>
+        </header>
+
+        <div id="mainApp" class="hidden">
+            <!-- 통계 요약 -->
+            <div class="mb-10 text-center">
+                <p class="text-zinc-400 text-lg mb-6">총 시청 기록: <span id="grandTotal" class="text-white font-black text-2xl">0</span>편</p>
+                <div id="yearContainer" class="flex flex-wrap justify-center gap-4"></div>
+            </div>
+
+            <!-- 월 선택 -->
+            <div id="monthContainer" class="hidden flex flex-wrap justify-center gap-3 mb-10 p-6 bg-zinc-900/80 rounded-[2rem] border border-zinc-800 shadow-2xl"></div>
+
+            <!-- 상세 통계 카드 -->
+            <div id="statsSection" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 text-center animate-fade-in">
+                <div class="bg-zinc-800 p-6 rounded-2xl border-t-4 border-[#E50914]">
+                    <p class="text-zinc-500 text-sm mb-1 uppercase tracking-widest font-bold">Monthly Views</p>
+                    <h2 id="statTotal" class="text-4xl font-black">0</h2>
+                </div>
+                <div class="bg-zinc-800 p-6 rounded-2xl border-t-4 border-blue-600">
+                    <p class="text-zinc-500 text-sm mb-1 uppercase tracking-widest font-bold">Series / Movie</p>
+                    <h2 id="statType" class="text-2xl font-black">- / -</h2>
+                </div>
+                <div class="bg-zinc-800 p-6 rounded-2xl border-t-4 border-green-600">
+                    <p class="text-zinc-500 text-sm mb-1 uppercase tracking-widest font-bold">Daily Average</p>
+                    <h2 id="statDay" class="text-2xl font-black">-</h2>
+                </div>
+            </div>
+
+            <!-- 결과 리스트 -->
+            <div id="listTitle" class="text-2xl font-black mb-6 pl-4 border-l-8 border-[#E50914]"></div>
+            <div id="movieList" class="space-y-4 pb-20"></div>
+        </div>
     </div>
 
     <script>
-        // --------------------------------------------------
-        // 데이터를 깨끗하게 정리했습니다!
-        // --------------------------------------------------
-        const viewingHistory = [
-          {
-            "title": "모두가 자신의 무가치함과 싸우고 있다: 리미티드 시리즈: \"1화\"",
-            "date": "26. 4. 26."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 3: \"1화\"",
-            "date": "26. 4. 25."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"12화\"",
-            "date": "26. 4. 20."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"11화\"",
-            "date": "26. 4. 20."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"10화\"",
-            "date": "26. 4. 19."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"9화\"",
-            "date": "26. 4. 19."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"8화\"",
-            "date": "26. 4. 19."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"7화\"",
-            "date": "26. 4. 19."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"6화\"",
-            "date": "26. 4. 18."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"5화\"",
-            "date": "26. 4. 18."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"4화\"",
-            "date": "26. 4. 18."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"3화\"",
-            "date": "26. 4. 18."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"2화\"",
-            "date": "26. 4. 18."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 2: \"1화\"",
-            "date": "26. 4. 18."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 1: \"10화\"",
-            "date": "26. 4. 18."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 1: \"9화\"",
-            "date": "26. 4. 18."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 1: \"8화\"",
-            "date": "26. 4. 17."
-          },
-          {
-            "title": "더 클리닝 레이디: 시즌 1: \"7화\"",
-            "date": "26. 4. 17."
-          },
-          {
-            "title": "안티히어로: 안티히어로: \"2화\"",
-            "date": "26. 4. 17."
-          },
-          {
-            "title": "안티히어로: 안티히어로: \"1화\"",
-            "date": "26. 4. 17."
-          }
-        ]; 
-        // --------------------------------------------------
+        let allData = [];
+        let groupedData = {};
 
-        const listContainer = document.getElementById('movie-list');
-        const countBadge = document.getElementById('count');
-        
-        // 데이터 출력 로직
-        countBadge.innerText = viewingHistory.length;
+        // 페이지 로드 시 깃허브 서버의 CSV를 자동으로 읽어옵니다.
+        window.onload = function() {
+            const csvFilePath = 'NetflixViewingHistory.csv'; // 파일명이 정확해야 합니다.
 
-        if (viewingHistory.length > 0) {
-            listContainer.innerHTML = viewingHistory.map(item => `
-                <div class="bg-zinc-800 p-4 rounded-lg flex justify-between items-center shadow-lg hover:scale-[1.01] transition-transform">
-                    <div>
-                        <div class="font-bold text-lg">${item.title}</div>
-                        <div class="text-zinc-400 text-sm">${item.date}</div>
+            Papa.parse(csvFilePath, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    allData = results.data;
+                    if (allData.length > 0) {
+                        initApp();
+                        document.getElementById('statusMessage').innerHTML = 
+                            `<i class="fa-solid fa-check-circle text-green-500"></i> ${allData.length.toLocaleString()}개의 데이터가 동기화되었습니다.`;
+                    } else {
+                        document.getElementById('statusMessage').innerText = "데이터를 찾을 수 없습니다.";
+                    }
+                },
+                error: function() {
+                    document.getElementById('statusMessage').innerHTML = 
+                        `<i class="fa-solid fa-exclamation-triangle text-red-500"></i> CSV 파일을 불러오지 못했습니다. 파일명을 확인하세요.`;
+                }
+            });
+        };
+
+        function initApp() {
+            organizeData();
+            document.getElementById('grandTotal').innerText = allData.length.toLocaleString();
+            document.getElementById('mainApp').classList.remove('hidden');
+            renderYears();
+        }
+
+        function organizeData() {
+            groupedData = {};
+            allData.forEach(item => {
+                const dateParts = item.Date.split('/');
+                const date = new Date(`20${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
+                if (!isNaN(date)) {
+                    const y = date.getFullYear();
+                    const m = date.getMonth() + 1;
+                    if (!groupedData[y]) groupedData[y] = {};
+                    if (!groupedData[y][m]) groupedData[y][m] = [];
+                    item.isSeries = /시즌|화|에피소드|Part|파트|Chapter/.test(item.Title);
+                    groupedData[y][m].push(item);
+                }
+            });
+        }
+
+        function renderYears() {
+            const container = document.getElementById('yearContainer');
+            const sortedYears = Object.keys(groupedData).sort((a, b) => b - a);
+            container.innerHTML = sortedYears.map(year => {
+                const yearTotal = Object.values(groupedData[year]).reduce((acc, curr) => acc + curr.length, 0);
+                return `
+                    <button onclick="selectYear('${year}')" class="year-btn bg-zinc-800 hover:bg-[#E50914] px-8 py-4 rounded-2xl font-black transition-all flex flex-col items-center min-w-[120px] shadow-lg">
+                        <span class="text-xl">${year}</span>
+                        <span class="text-xs text-zinc-500 mt-1">${yearTotal}편</span>
+                    </button>`;
+            }).join('');
+        }
+
+        function selectYear(year) {
+            const container = document.getElementById('monthContainer');
+            container.classList.remove('hidden');
+            document.querySelectorAll('.year-btn').forEach(btn => btn.classList.remove('bg-[#E50914]', 'ring-4', 'ring-white/20'));
+            event.currentTarget.classList.add('bg-[#E50914]', 'ring-4', 'ring-white/20');
+
+            const availableMonths = Object.keys(groupedData[year]).sort((a, b) => a - b);
+            container.innerHTML = availableMonths.map(month => `
+                <button onclick="selectMonth('${year}', '${month}')" class="month-btn bg-zinc-700 hover:bg-white hover:text-black px-6 py-3 rounded-xl font-bold flex flex-col items-center min-w-[80px]">
+                    <span>${month}월</span>
+                    <span class="text-[10px] opacity-60">${groupedData[year][month].length}편</span>
+                </button>`).join('');
+            document.getElementById('movieList').innerHTML = '';
+            document.getElementById('statsSection').classList.add('hidden');
+        }
+
+        function selectMonth(year, month) {
+            const data = groupedData[year][month];
+            document.getElementById('statsSection').classList.remove('hidden');
+            const seriesCount = data.filter(i => i.isSeries).length;
+            document.getElementById('statTotal').innerText = data.length + "편";
+            document.getElementById('statType').innerText = `📺${seriesCount} / 🎬${data.length - seriesCount}`;
+            document.getElementById('statDay').innerText = `일평균 ${(data.length/30).toFixed(1)}편`;
+            renderDetails(year, month, data);
+        }
+
+        function renderDetails(year, month, data) {
+            const listContainer = document.getElementById('movieList');
+            document.getElementById('listTitle').innerText = `${year}년 ${month}월 시청 목록`;
+            listContainer.innerHTML = data.map(item => `
+                <div class="bg-zinc-900 p-6 rounded-3xl flex items-center gap-6 border border-zinc-800 hover:border-[#E50914] transition-all animate-fade-in shadow-xl">
+                    <div class="w-14 h-14 bg-zinc-800 rounded-full flex items-center justify-center text-[#E50914] flex-shrink-0"><i class="fa-solid fa-play"></i></div>
+                    <div class="flex-grow">
+                        <div class="flex gap-2 mb-1">
+                            <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">${item.Date}</span>
+                            <span class="text-[10px] font-black text-[#E50914] uppercase">${item.isSeries ? 'Series' : 'Movie'}</span>
+                        </div>
+                        <h3 class="text-xl font-black leading-tight">${item.Title}</h3>
                     </div>
-                </div>
-            `).join('');
-        } else {
-            listContainer.innerHTML = '<p class="text-zinc-500 text-center">데이터가 비어있습니다.</p>';
+                    <a href="https://www.google.com/search?q=${encodeURIComponent(item.Title)}+넷플릭스+정보" target="_blank" class="p-4 rounded-full border border-zinc-800 hover:bg-white hover:text-black transition-all">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </a>
+                </div>`).join('');
         }
     </script>
 </body>
