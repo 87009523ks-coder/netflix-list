@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Zorba's Netflix Archive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#141414] text-white p-6">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold text-red-600 mb-8">MY NETFLIX <span id="count" class="text-sm bg-red-600 text-white px-3 py-1 rounded-full ml-2">0</span></h1>
+        <div id="movie-list" class="space-y-4"></div>
+    </div>
+
+    <script>
+        // --------------------------------------------------
+        // 데이터를 깨끗하게 정리했습니다!
+        // --------------------------------------------------
+        const viewingHistory = [
+          {
+            "title": "모두가 자신의 무가치함과 싸우고 있다: 리미티드 시리즈: \"1화\"",
+            "date": "26. 4. 26."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 3: \"1화\"",
+            "date": "26. 4. 25."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"12화\"",
+            "date": "26. 4. 20."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"11화\"",
+            "date": "26. 4. 20."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"10화\"",
+            "date": "26. 4. 19."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"9화\"",
+            "date": "26. 4. 19."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"8화\"",
+            "date": "26. 4. 19."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"7화\"",
+            "date": "26. 4. 19."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"6화\"",
+            "date": "26. 4. 18."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"5화\"",
+            "date": "26. 4. 18."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"4화\"",
+            "date": "26. 4. 18."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"3화\"",
+            "date": "26. 4. 18."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"2화\"",
+            "date": "26. 4. 18."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 2: \"1화\"",
+            "date": "26. 4. 18."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 1: \"10화\"",
+            "date": "26. 4. 18."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 1: \"9화\"",
+            "date": "26. 4. 18."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 1: \"8화\"",
+            "date": "26. 4. 17."
+          },
+          {
+            "title": "더 클리닝 레이디: 시즌 1: \"7화\"",
+            "date": "26. 4. 17."
+          },
+          {
+            "title": "안티히어로: 안티히어로: \"2화\"",
+            "date": "26. 4. 17."
+          },
+          {
+            "title": "안티히어로: 안티히어로: \"1화\"",
+            "date": "26. 4. 17."
+          }
+        ]; 
+        // --------------------------------------------------
+
+        const listContainer = document.getElementById('movie-list');
+        const countBadge = document.getElementById('count');
+        
+        // 데이터 출력 로직
+        countBadge.innerText = viewingHistory.length;
+
+        if (viewingHistory.length > 0) {
+            listContainer.innerHTML = viewingHistory.map(item => `
+                <div class="bg-zinc-800 p-4 rounded-lg flex justify-between items-center shadow-lg hover:scale-[1.01] transition-transform">
+                    <div>
+                        <div class="font-bold text-lg">${item.title}</div>
+                        <div class="text-zinc-400 text-sm">${item.date}</div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            listContainer.innerHTML = '<p class="text-zinc-500 text-center">데이터가 비어있습니다.</p>';
+        }
+    </script>
+</body>
+</html>
