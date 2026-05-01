@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zorba's Cinema Pro - Unique Edition</title>
+    <title>Zorba's Cinema Pro - Refined Design</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -14,17 +14,20 @@
             <h1 class="text-6xl font-black text-[#E50914] mb-4 tracking-tighter italic">ZORBA'S CINEMA PRO</h1>
             <div id="statusMessage" class="text-zinc-500 font-bold mb-2">데이터 동기화 중...</div>
             <div id="grandTotalDisplay" class="hidden text-xl font-bold text-zinc-400 italic">
-                총 시청 작품: <span id="uniqueTotal" class="text-white text-3xl">0</span>편 
+                총 시청 작품: <span id="uniqueTotal" class="text-emerald-400 text-3xl">0</span>편 
                 <span id="rawTotal" class="text-sm font-normal ml-2">(0개 에피소드 포함)</span>
             </div>
         </header>
 
         <div id="mainApp" class="hidden">
+            <!-- 연도 선택 섹션 -->
             <div id="yearContainer" class="flex flex-wrap justify-center gap-4 mb-10"></div>
-            <div id="monthContainer" class="hidden flex flex-wrap justify-center gap-3 mb-10 p-6 bg-zinc-900/80 rounded-[2rem] border border-zinc-800 shadow-2xl"></div>
             
-            <!-- 상세 페이지 (목록) -->
-            <div id="listTitle" class="text-2xl font-black mb-6 pl-4 border-l-8 border-[#E50914]"></div>
+            <!-- 월 선택 섹션 -->
+            <div id="monthContainer" class="hidden flex flex-wrap justify-center gap-3 mb-10 p-6 bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-white/5 shadow-2xl"></div>
+            
+            <!-- 상세 목록 -->
+            <div id="listTitle" class="text-2xl font-black mb-6 pl-4 border-l-8 border-emerald-500"></div>
             <div id="movieList" class="space-y-4 pb-20"></div>
         </div>
     </div>
@@ -47,18 +50,14 @@
         };
 
         function getBaseTitle(title) {
-            // 콜론(:) 앞부분만 추출하여 대제목 생성
             return title.split(':')[0].trim();
         }
 
         function initApp() {
             organizeData();
-            
-            // 전체 고유 작품 수 계산
             const uniqueTitles = new Set(allData.map(item => getBaseTitle(item.Title)));
             document.getElementById('uniqueTotal').innerText = uniqueTitles.size.toLocaleString();
             document.getElementById('rawTotal').innerText = `(${allData.length.toLocaleString()}개 에피소드 포함)`;
-            
             document.getElementById('statusMessage').classList.add('hidden');
             document.getElementById('grandTotalDisplay').classList.remove('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
@@ -75,7 +74,6 @@
                     const m = date.getMonth() + 1;
                     if (!groupedData[y]) groupedData[y] = {};
                     if (!groupedData[y][m]) groupedData[y][m] = [];
-                    
                     item.baseTitle = getBaseTitle(item.Title);
                     groupedData[y][m].push(item);
                 }
@@ -86,13 +84,12 @@
             const container = document.getElementById('yearContainer');
             const sortedYears = Object.keys(groupedData).sort((a, b) => b - a);
             container.innerHTML = sortedYears.map(year => {
-                // 연도별 고유 작품 수 계산
                 const yearData = Object.values(groupedData[year]).flat();
                 const yearUniqueCount = new Set(yearData.map(d => d.baseTitle)).size;
                 return `
-                    <button onclick="selectYear('${year}')" class="year-btn bg-zinc-800 hover:bg-[#E50914] px-8 py-4 rounded-2xl font-black transition-all flex flex-col items-center min-w-[120px]">
-                        <span class="text-xl">${year}</span>
-                        <span class="text-xs text-zinc-500 mt-1">${yearUniqueCount} 작품</span>
+                    <button onclick="selectYear('${year}')" class="year-btn bg-zinc-800/50 hover:bg-zinc-700 px-8 py-4 rounded-2xl font-black transition-all flex flex-col items-center min-w-[130px] border border-white/5 shadow-lg">
+                        <span class="text-xl text-zinc-100">${year}</span>
+                        <span class="text-xs text-amber-400 mt-1 font-bold">${yearUniqueCount} 작품</span>
                     </button>`;
             }).join('');
         }
@@ -100,16 +97,22 @@
         function selectYear(year) {
             const container = document.getElementById('monthContainer');
             container.classList.remove('hidden');
-            document.querySelectorAll('.year-btn').forEach(btn => btn.classList.remove('bg-[#E50914]'));
-            event.currentTarget.classList.add('bg-[#E50914]');
+            
+            // 모든 연도 버튼 스타일 초기화 및 선택 효과 적용
+            document.querySelectorAll('.year-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-500/30', 'ring-2', 'ring-emerald-500/50', 'border-emerald-500/50');
+                btn.classList.add('bg-zinc-800/50');
+            });
+            event.currentTarget.classList.add('bg-emerald-500/30', 'ring-2', 'ring-emerald-500/50', 'border-emerald-500/50');
+            event.currentTarget.classList.remove('bg-zinc-800/50');
 
             const availableMonths = Object.keys(groupedData[year]).sort((a, b) => a - b);
             container.innerHTML = availableMonths.map(month => {
                 const monthUniqueCount = new Set(groupedData[year][month].map(d => d.baseTitle)).size;
                 return `
-                    <button onclick="selectMonth('${year}', '${month}')" class="month-btn bg-zinc-700 hover:bg-white hover:text-black px-6 py-3 rounded-xl font-bold flex flex-col items-center min-w-[80px]">
+                    <button onclick="selectMonth('${year}', '${month}')" class="month-btn bg-zinc-800 hover:bg-emerald-500 hover:text-white px-6 py-3 rounded-xl font-bold flex flex-col items-center min-w-[90px] border border-white/5 transition-colors">
                         <span>${month}월</span>
-                        <span class="text-[10px] opacity-60">${monthUniqueCount} 작품</span>
+                        <span class="text-[10px] text-amber-400/80">${monthUniqueCount} 작품</span>
                     </button>`;
             }).join('');
             document.getElementById('movieList').innerHTML = '';
@@ -117,9 +120,12 @@
 
         function selectMonth(year, month) {
             const data = groupedData[year][month];
-            
-            // 월별 데이터를 작품별로 그룹화
             const workMap = {};
+            
+            // 월 버튼 활성화 표시
+            document.querySelectorAll('.month-btn').forEach(btn => btn.classList.remove('bg-emerald-600', 'text-white'));
+            event.currentTarget.classList.add('bg-emerald-600', 'text-white');
+
             data.forEach(item => {
                 if (!workMap[item.baseTitle]) {
                     workMap[item.baseTitle] = {
@@ -130,8 +136,6 @@
                     };
                 }
                 workMap[item.baseTitle].episodes.push(item.Title);
-                
-                // 시즌 정보 추출 (정규식 활용)
                 const seasonMatch = item.Title.match(/(시즌\s?\d+|파트\s?\d+|Part\s?\d+|리미티드 시리즈)/);
                 if (seasonMatch) workMap[item.baseTitle].seasons.add(seasonMatch[0]);
             });
@@ -141,23 +145,23 @@
 
         function renderDetails(year, month, works) {
             const listContainer = document.getElementById('movieList');
-            document.getElementById('listTitle').innerText = `${year}년 ${month}월 시청 목록 (${works.length} 작품)`;
+            document.getElementById('listTitle').innerText = `${year}년 ${month}월 (${works.length} 작품)`;
             
             listContainer.innerHTML = works.map(work => `
-                <div class="bg-zinc-900 p-6 rounded-3xl flex items-center gap-6 border border-zinc-800 hover:border-[#E50914] transition-all shadow-xl">
-                    <div class="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center text-[#E50914] flex-shrink-0">
+                <div class="bg-zinc-900/80 p-6 rounded-3xl flex items-center gap-6 border border-white/5 hover:border-emerald-500/50 transition-all shadow-xl backdrop-blur-sm">
+                    <div class="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500 flex-shrink-0 border border-emerald-500/20">
                         <i class="fa-solid ${work.seasons.size > 0 ? 'fa-layer-group' : 'fa-film'}"></i>
                     </div>
                     <div class="flex-grow">
                         <div class="flex gap-2 mb-1 items-center">
-                            <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">${work.lastDate}</span>
-                            ${work.seasons.size > 0 ? `<span class="bg-blue-900/50 text-blue-300 text-[9px] px-2 py-0.5 rounded font-bold">${work.seasons.size} Seasons</span>` : ''}
-                            <span class="bg-zinc-800 text-zinc-400 text-[9px] px-2 py-0.5 rounded font-bold">${work.episodes.length} Episodes</span>
+                            <span class="text-[10px] font-bold text-zinc-500 tracking-widest">${work.lastDate}</span>
+                            ${work.seasons.size > 0 ? `<span class="bg-emerald-900/30 text-emerald-400 text-[9px] px-2 py-0.5 rounded border border-emerald-500/20 font-bold">${work.seasons.size} SEASONS</span>` : ''}
+                            <span class="bg-zinc-800 text-amber-400/80 text-[9px] px-2 py-0.5 rounded font-bold">${work.episodes.length} EPISODES</span>
                         </div>
-                        <h3 class="text-xl font-black leading-tight">${work.title}</h3>
+                        <h3 class="text-xl font-black leading-tight text-zinc-100">${work.title}</h3>
                     </div>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent(work.title)}+정보" target="_blank" class="p-4 rounded-full border border-zinc-800 hover:bg-white hover:text-black transition-all">
-                        <i class="fa-solid fa-magnifying-glass"></i>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent(work.title)}+정보" target="_blank" class="p-4 rounded-full border border-white/10 hover:bg-emerald-500 hover:text-white transition-all group">
+                        <i class="fa-solid fa-magnifying-glass group-hover:scale-110 transition-transform"></i>
                     </a>
                 </div>`).join('');
         }
